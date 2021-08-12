@@ -11,7 +11,7 @@ program.option("--autoKill <bool>", "If true, program will kill itself when it n
 program.option("--markLaunch <bool>", "If true, program creates a temporary file at startup which notifies older instances that they're outdated.");
 
 program.parse(process.argv);
-export const launchOpts = program.opts();
+const launchOpts = program.opts();
 const watchPaths = launchOpts.watchPaths.split(launchOpts.watchPaths.includes("|") ? "|" : ","); // use | as delimiter if present (eg. when folder-names include ",")
 const toPath = launchOpts.to;
 const async = launchOpts.async ?? false;
