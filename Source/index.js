@@ -12,7 +12,7 @@ program.option("--markLaunch <bool>", "If true, program creates a temporary file
 
 program.parse(process.argv);
 const launchOpts = program.opts();
-const watchPaths = launchOpts.watchPaths.split(launchOpts.watchPaths.includes("|") ? "|" : ","); // use | as delimiter if present (eg. when folder-names include ",")
+const fromPaths = launchOpts.from.split(launchOpts.from.includes("|") ? "|" : ","); // use | as delimiter if present (eg. when folder-names include ",")
 const toPath = launchOpts.to;
 const async = launchOpts.async ?? false;
 const autoKill = launchOpts.autoKill ?? async;
@@ -69,7 +69,7 @@ if (allowKillSelf) {
 
 BuildAndWatch();
 function BuildAndWatch() {
-	for (const path of watchPaths) {
+	for (const path of fromPaths) {
 		if (!fs.existsSync(path)) continue;
 		const isDir = fs.lstatSync(path).isDirectory();
 		if (isDir) {

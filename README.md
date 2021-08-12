@@ -14,10 +14,10 @@ yarn add file-syncer # or: npm i file-syncer
 
 ```
 // basic
-npx file-syncer --watchPaths XXX,YYY,ZZZ --to HardLinks [--async] [--autoKill]
+npx file-syncer --from XXX,YYY,ZZZ --to HardLinks [--async] [--autoKill]
 
 // for live-sync of node-modules
-npx file-syncer --watchPaths node_modules/XXX,node_modules/YYY --to NMHardLinks [--async] [--autoKill]
+npx file-syncer --from node_modules/XXX,node_modules/YYY --to NMHardLinks [--async] [--autoKill]
 ```
 
 Run `npx file-syncer --help` for more details. (or check the source code)
