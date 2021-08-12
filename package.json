@@ -1,0 +1,37 @@
+{
+	"name": "file-syncer",
+	"description": "Utility for syncing files -- mainly live-sync of folder symlinks to hardlinks. (for Docker and other stubborn tools)",
+	"version": "0.0.1",
+	"author": "Venryx (https://venryx.com)",
+	"#main": "Dist/index.js",
+	"#typings": "Dist/index.d.ts",
+	"main": "Source/index.js",
+	"bin": {
+		"file-syncer": "./Source/index.js"
+	},
+	"#type": "module",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Venryx/file-syncer.git"
+	},
+	"keywords": [
+		"file",
+		"folder",
+		"sync",
+		"synchronize",
+		"mirror",
+		"docker",
+		"symlink",
+		"hardlink"
+	],
+	"scripts": {
+		"dev": "tsc --watch",
+		"dist": "tsc"
+	},
+	"dependencies": {
+		"chokidar": "^3.5.2",
+		"sync-directory": "^2.2.22",
+		"typescript": "^4.3.5"
+	}
+}
