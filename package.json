@@ -7,7 +7,7 @@
 	"#typings": "Dist/index.d.ts",
 	"main": "Source/index.js",
 	"bin": {
-		"file-syncer": "./Source/index.js"
+		"file-syncer": "./bin/file-syncer"
 	},
 	"#type": "module",
 	"license": "MIT",

@@ -4,7 +4,7 @@ const chokidar = require("chokidar");
 const sync = require("sync-directory");
 const {program} = require("commander");
 
-program.requiredOption("--from <paths...>", `Paths to watch, relative to the working-directory. (paths separated by "," or "|")`);
+program.requiredOption("--from <paths...>", `Paths to watch, relative to the working-directory. (paths separated by spaces; wrap paths that contain spaces in quotes)`);
 program.requiredOption("--to <path>", `Folder in which to create hard-links of the watched files. (given "--to XXX", $cwd/path/to/watched-folder has its files hard-linked to XXX/path/to/watched/folder)`);
 program.option("--async", "If set, program will make a non-blocking fork of itself, and then kill itself. (fork's self-kill will match parent)");
 program.option("--autoKill <bool>", "If true, program will kill itself when it notices a newer instance running in the same directory.");
@@ -12,7 +12,8 @@ program.option("--markLaunch <bool>", "If true, program creates a temporary file
 
 program.parse(process.argv);
 const launchOpts = program.opts();
-const fromPaths = launchOpts.from.split(launchOpts.from.includes("|") ? "|" : ","); // use | as delimiter if present (eg. when folder-names include ",")
+//const fromPaths = launchOpts.from.split(launchOpts.from.includes("|") ? "|" : ","); // use | as delimiter if present (eg. when folder-names include ",")
+const fromPaths = launchOpts.from; // use | as delimiter if present (eg. when folder-names include ",")
 const toPath = launchOpts.to;
 const async = launchOpts.async ?? false;
 const autoKill = launchOpts.autoKill ?? async;
@@ -22,7 +23,7 @@ if (async) {
 	var {spawn} = require("child_process");
 	var spawn = spawn(
 		process.argv[0],
-		process.argv.slice(1).filter(a=>a != "--async").concat(`--autoKill ${autoKill}`), // inherit self-killability from parent
+		process.argv.slice(1).filter(a=>a != "--async").concat(`--autoKill`, autoKill), // inherit self-killability from parent
 		{detached: true},
 	);
 	process.exit();
@@ -45,7 +46,7 @@ const launchTime = Date.now();
 if (markLaunch) {
 	fs.writeFileSync(`${__dirname}/LastLaunch_${launchTime}_${cwd_filenameSafe}`, "");
 }
-if (allowKillSelf) {
+if (autoKill) {
 	// watch for "LastLaunch_XXX" file creation; this way, if another launch starts in this folder, the current one will kill itself (easiest way to prevent runaway watchers)
 	const watcher = chokidar.watch(".", {
 		cwd: __dirname,
