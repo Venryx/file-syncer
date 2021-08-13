@@ -29,11 +29,11 @@ From: https://stackoverflow.com/a/68765508
 Given the existing directory structure:
 ```
 parent_dir
-    - common_files
-        - file.txt
-    - my-app
-        - Dockerfile
-		  - common_files -> symlink to ../common_files
+	- common_files
+		- file.txt
+	- my-app
+		- Dockerfile
+		- common_files -> symlink to ../common_files
 ```
 
 Basic usage:
