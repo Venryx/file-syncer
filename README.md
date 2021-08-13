@@ -59,8 +59,11 @@ COPY HardLinked /
 
 * How is this better than copying `parent_dir/common-files` to `parent_dir/my-app/common_files_Copy` before Docker runs, then having Docker copy that over to `parent_dir/my-app/common_files` at build time?
 > There are two advantages:
-> 1) `file-syncer` watches the source directory (by default), mirroring any file changes that occur; this saves time and avoids the developer forgetting.
-> 2) `file-syncer` does not "copy" the files in the regular sense. Rather, it creates [hard links](https://www.geeksforgeeks.org/soft-hard-links-unixlinux) from the source folder's files. This means that if you edit the files under `parent_dir/my-app/HardLinked/common_files`, the files under `parent_dir/common_files` are instantly updated, and vice-versa, because they reference the same file/inode. (this can be helpful for debugging purposes and cross-project editing, and ensures that your version of the files is always in-sync/identical-to the source files)
+> 1) `file-syncer` does not "copy" the files in the regular sense. Rather, it creates [hard links](https://www.geeksforgeeks.org/soft-hard-links-unixlinux) from the source folder's files. This means that if you edit the files under `parent_dir/my-app/HardLinked/common_files`, the files under `parent_dir/common_files` are instantly updated, and vice-versa, because they reference the same file/inode. (this can be helpful for debugging purposes and cross-project editing, and ensures that your version of the files is always in-sync/identical-to the source files)
+> 2) Because `file-syncer` only updates the hard-link files for the exact files that get changed, file-watcher tools like [Tilt](https://github.com/tilt-dev/tilt) or [Skaffold](https://github.com/GoogleContainerTools/skaffold) detect changes for the minimal set of files, which can mean faster live-update-push times than you'd get with a basic "copy whole folder on file change" tool would.
+
+* How is this better than a regular file-sync tool like Syncthing?
+> Some of those tools may be usable, but most have issues of one kind or another. The most common one is that the tool either cannot produce hard-links of existing files, or it's unable to "push an update" for a file that is already hard-linked (since hard-linked files do not notify file-watchers of their changes automatically, if the edited-at and watched-at paths differ). Another is that many of these sync tools are not designed for instant responding, and/or do not have run flags that make them easy to use in restricted build tools. (eg. for Tilt, the `--async` flag of `file-syncer` enables it to be used in a `local(...)` invokation in the project's `Tiltfile`.)
 
 ## Tasks
 
