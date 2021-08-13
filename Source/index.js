@@ -6,7 +6,7 @@ const {program} = require("commander");
 
 program.requiredOption("--from <paths...>", `Paths to watch, relative to the working-directory. (paths separated by spaces; wrap paths that contain spaces in quotes)`);
 program.requiredOption("--to <path>", `Folder in which to create hard-links of the watched files. (given "--to XXX", $cwd/path/to/watched-folder has its files hard-linked to XXX/path/to/watched/folder)`);
-program.options("--replacements <pairElements>", `Example: --replacements "replace this" "with that" "and replace this" "with that")`);
+program.option("--replacements <pairElements>", `Example: --replacements "replace this" "with that" "and replace this" "with that")`);
 program.option("--watch [bool]", `If true, program will monitor the "from" paths; whenever a file change is detected, it will mirror it to the "to" folder. [default: true]`);
 program.option("--async [bool]", "If true, program will make a non-blocking fork of itself, and then kill itself. (fork's self-kill will match parent) [default: false]");
 program.option("--autoKill [bool]", "If true, program will kill itself when it notices a newer instance running in the same directory. [default: async?]");
