@@ -6,6 +6,7 @@ const {program} = require("commander");
 
 program.requiredOption("--from <paths...>", `Paths to watch, relative to the working-directory. (paths separated by spaces; wrap paths that contain spaces in quotes)`);
 program.requiredOption("--to <path>", `Folder in which to create hard-links of the watched files. (given "--to XXX", $cwd/path/to/watched-folder has its files hard-linked to XXX/path/to/watched/folder)`);
+program.options("--replacements <pairElements>", `Example: --replacements "replace this" "with that" "and replace this" "with that")`);
 program.option("--watch [bool]", `If true, program will monitor the "from" paths; whenever a file change is detected, it will mirror it to the "to" folder. [default: true]`);
 program.option("--async [bool]", "If true, program will make a non-blocking fork of itself, and then kill itself. (fork's self-kill will match parent) [default: false]");
 program.option("--autoKill [bool]", "If true, program will kill itself when it notices a newer instance running in the same directory. [default: async?]");
@@ -14,7 +15,16 @@ program.option("--markLaunch [bool]", "If true, program creates a temporary file
 program.parse(process.argv);
 const launchOpts = program.opts();
 //const fromPaths = launchOpts.from.split(launchOpts.from.includes("|") ? "|" : ","); // use | as delimiter if present (eg. when folder-names include ",")
-const fromPaths = launchOpts.from; // use | as delimiter if present (eg. when folder-names include ",")
+const fromPaths = launchOpts.from;
+const replacements = [];
+let nextFromStr;
+for (const [i, str] of launchOpts.replacements.entries()) {
+	if (i % 2 == 0) {
+		nextFromStr = str;
+	} else {
+		replacements.push({from: nextFromStr, to: str});
+	}
+}
 const toPath = launchOpts.to;
 const watch = launchOpts.watch ?? true;
 const async = launchOpts.async ?? false;
@@ -71,26 +81,36 @@ if (autoKill && watch) {
 	});
 }
 
+function FinalizeDestPath_Rel(path_rel) {
+	let result = path_rel;
+	for (const replacement of replacements) {
+		result = result.replace(replacement.from, replacement.to);
+	}
+	return result;
+}
+
 BuildAndWatch();
 function BuildAndWatch() {
-	for (const path of fromPaths) {
-		if (!fs.existsSync(path)) continue;
-		const isDir = fs.lstatSync(path).isDirectory();
+	for (const path_rel of fromPaths) {
+		if (!fs.existsSync(path_rel)) continue;
+		const isDir = fs.lstatSync(path_rel).isDirectory();
 		if (isDir) {
-			console.log(`Syncing${watch ? "+watching" : ""} folder:`, path);
-			sync(fromRoot(path), fromRoot(toPath, path), {
+			console.log(`Syncing${watch ? "+watching" : ""} folder:`, path_rel);
+			const path_rel_dest = FinalizeDestPath_Rel(path_rel);
+			sync(fromRoot(path_rel), fromRoot(toPath, path_rel_dest), {
 				watch,
 				//type: "hardlink", // already the default
 				//ignoreInitial: true,
 			});
 		} else {
-			console.log(`Syncing${watch ? "+watching" : ""} file:`, path);
-			const dir_rel = paths.dirname(path);
+			console.log(`Syncing${watch ? "+watching" : ""} file:`, path_rel);
+			const dir_rel = paths.dirname(path_rel);
+			const dir_rel_dest = FinalizeDestPath_Rel(dir_rel);
 			// sync-directory only works on folders, so watch the folder, but then...
-			sync(fromRoot(dir_rel), fromRoot(toPath, dir_rel), {
+			sync(fromRoot(dir_rel), fromRoot(toPath, dir_rel_dest), {
 				watch,
 				exclude: /.*/, // 1) exclude all files
-				forceSync: filePath=>filePath == path, // 2) force-re-include the one target file
+				forceSync: filePath=>filePath == path_rel, // 2) force-re-include the one target file
 				//ignoreInitial: true,
 			});
 		}
