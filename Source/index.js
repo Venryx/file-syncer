@@ -6,15 +6,17 @@ const {program} = require("commander");
 
 program.requiredOption("--from <paths...>", `Paths to watch, relative to the working-directory. (paths separated by spaces; wrap paths that contain spaces in quotes)`);
 program.requiredOption("--to <path>", `Folder in which to create hard-links of the watched files. (given "--to XXX", $cwd/path/to/watched-folder has its files hard-linked to XXX/path/to/watched/folder)`);
-program.option("--async", "If set, program will make a non-blocking fork of itself, and then kill itself. (fork's self-kill will match parent)");
-program.option("--autoKill <bool>", "If true, program will kill itself when it notices a newer instance running in the same directory.");
-program.option("--markLaunch <bool>", "If true, program creates a temporary file at startup which notifies older instances that they're outdated.");
+program.option("--watch <bool>", `If true, program will monitor the "from" paths; whenever a file change is detected, it will mirror it to the "to" folder. [default: true]`);
+program.option("--async <bool>", "If true, program will make a non-blocking fork of itself, and then kill itself. (fork's self-kill will match parent) [default: false]");
+program.option("--autoKill <bool>", "If true, program will kill itself when it notices a newer instance running in the same directory. [default: async?]");
+program.option("--markLaunch <bool>", "If true, program creates a temporary file at startup which notifies older instances that they're outdated. [default: false]");
 
 program.parse(process.argv);
 const launchOpts = program.opts();
 //const fromPaths = launchOpts.from.split(launchOpts.from.includes("|") ? "|" : ","); // use | as delimiter if present (eg. when folder-names include ",")
 const fromPaths = launchOpts.from; // use | as delimiter if present (eg. when folder-names include ",")
 const toPath = launchOpts.to;
+const watch = launchOpts.watch ?? true;
 const async = launchOpts.async ?? false;
 const autoKill = launchOpts.autoKill ?? async;
 const markLaunch = launchOpts.markLaunch ?? false;
@@ -46,7 +48,8 @@ const launchTime = Date.now();
 if (markLaunch) {
 	fs.writeFileSync(`${__dirname}/LastLaunch_${launchTime}_${cwd_filenameSafe}`, "");
 }
-if (autoKill) {
+// if auto-kill enabled, and there's actually a point to it (ie. watching is enabled)
+if (autoKill && watch) {
 	// watch for "LastLaunch_XXX" file creation; this way, if another launch starts in this folder, the current one will kill itself (easiest way to prevent runaway watchers)
 	const watcher = chokidar.watch(".", {
 		cwd: __dirname,
@@ -74,18 +77,18 @@ function BuildAndWatch() {
 		if (!fs.existsSync(path)) continue;
 		const isDir = fs.lstatSync(path).isDirectory();
 		if (isDir) {
-			console.log("Watching folder:", path);
+			console.log(`Syncing${watch ? "+watching" : ""} folder:`, path);
 			sync(fromRoot(path), fromRoot(toPath, path), {
-				watch: true,
+				watch,
 				//type: "hardlink", // already the default
 				//ignoreInitial: true,
 			});
 		} else {
-			console.log("Watching file:", path);
+			console.log(`Syncing${watch ? "+watching" : ""} file:`, path);
 			const dir_rel = paths.dirname(path);
 			// sync-directory only works on folders, so watch the folder, but then...
 			sync(fromRoot(dir_rel), fromRoot(toPath, dir_rel), {
-				watch: true,
+				watch,
 				exclude: /.*/, // 1) exclude all files
 				forceSync: filePath=>filePath == path, // 2) force-re-include the one target file
 				//ignoreInitial: true,
