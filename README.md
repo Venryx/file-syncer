@@ -55,7 +55,7 @@ COPY HardLinked /
 **Q/A**
 
 * How is this better than just copying `parent_dir/common-files` to `parent_dir/my-app/common_files` before Docker runs?
-> That would mean giving up the regular symlink, which would be a loss, since symlinks are helpful and work fine with most tools.
+> That would mean giving up the regular symlink, which would be a loss, since symlinks are helpful and work fine with most tools. It also means you can't see/edit the source files of `common_files` from the in-my-app copy, which has some disadvantages. (see below)
 
 * How is this better than copying `parent_dir/common-files` to `parent_dir/my-app/common_files_Copy` before Docker runs, then having Docker copy that over to `parent_dir/my-app/common_files` at build time?
 > There are two advantages:
