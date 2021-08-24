@@ -14,13 +14,13 @@ yarn add file-syncer # or: npm i file-syncer
 
 ```
 // basic
-npx file-syncer --from XXX YYY ZZZ --to HardLinked [--watch] [--async] [--autoKill]
+npx file-syncer --from XXX YYY ZZZ --to HardLinked [--watch] [--async] [--autoKill] [etc...]
 
 // node-modules
 npx file-syncer --from node_modules/XXX "node_modules/spa ces" --to HardLinked
 ```
 
-Run `npx file-syncer --help` for more details. (or check the source code)
+Run `npx file-syncer --help` for more details. (or check the option list in the [source code](https://github.com/Venryx/file-syncer/blob/master/Source/index.js))
 
 ## Docker example
 
