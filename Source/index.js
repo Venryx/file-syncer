@@ -38,7 +38,7 @@ async function Go() {
 		var {spawn} = require("child_process");
 		const args = process.argv.slice(1);
 
-		// replace "async" arg with false, but for any args that were inferred from "async:true", store their resolved values so child inherits them
+		// replace "async" arg with false, but for any args that were (possibly) inferred from "async:true", store their resolved values so child inherits them
 		ReplaceArgValue(args, "async", false);
 		ReplaceArgValue(args, "useLastIfUnchanged", useLastIfUnchanged);
 		ReplaceArgValue(args, "autoKill", autoKill);
